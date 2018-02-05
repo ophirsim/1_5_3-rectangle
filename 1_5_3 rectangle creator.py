@@ -17,17 +17,19 @@ import Tkinter
 root = Tkinter.Tk()
 root.wm_title('Color-Shape Art Creation')
 
+shape = Tkinter.StringVar()
+shape.set("circle")
 ######
 # Create a text editor window for displaying information
 #######
 editor = Tkinter.Text(root, width=10)
-editor.grid(column=2, row=0, rowspan=3)
+editor.grid(column=2, row=0, rowspan=5)
 
 ######
 # Create a canvas and place it
 #######
 canvas = Tkinter.Canvas(root, height=300, width=300, background='#FFFFFF')
-canvas.grid(row=0, column=1, rowspan=4)
+canvas.grid(row=0, column=1, rowspan=5)
 
 ######
 # Instantiate three IntVars
@@ -75,15 +77,21 @@ class ColorSlider(Tkinter.Scale): # ColorSlider is a subclass of Tkinter.Scale
 # Create and place the controllers
 red_slider = ColorSlider(root, 'Red:', red_intvar, editor, canvas)
 red_slider.grid(row=1, column=0, sticky=Tkinter.W)
+red_slider.set(127)
 
 green_slider = ColorSlider(root, 'Green:', green_intvar, editor, canvas)
 green_slider.grid(row=2, column=0, sticky=Tkinter.W)
+green_slider.set(127)
 
 blue_slider = ColorSlider(root, 'Blue:', blue_intvar, editor, canvas)
-blue_slider.grid(row=3, column=0, sticky=Tkinter.W)    
+blue_slider.grid(row=3, column=0, sticky=Tkinter.W)
+blue_slider.set(127)    
 
-circleButton=Tkinter.Radiobutton(root,text="Circle",padx=20)
+circleButton=Tkinter.Radiobutton(root,text="Circle", variable=shape, value="circle")
 circleButton.grid(row=4, column=0, sticky=Tkinter.W)
+
+rectangleButton=Tkinter.Radiobutton(root,text="Rectangle", variable=shape, value="rectangle")
+rectangleButton.grid(row=5, column=0, sticky=Tkinter.W)
 ######
 # Inform user of mouse interface
 ######
@@ -108,6 +116,7 @@ canvas.itemconfig(shapes[4],outline='green')
 # Initialize globals so function defs can assign to them
 startx, starty = 300, 300 
 
+
 # Define canvas' mouse-button event handler
 def down(event): # A mouse event will be passed in with x and y attributes
     global startx, starty # Use global variables for assignment
@@ -118,21 +127,16 @@ def up(event):
     tk_color_string = color(red_intvar, green_intvar, blue_intvar)
     r = (startx-event.x)**2 + (starty-event.y)**2  # Pythagorean theorem
     r = int(r**.5)                                 # square root to get distance
-    new_shape = canvas.create_oval(startx-r, starty-r, startx+r, starty+r,
+    if shape.get()=="circle":
+        new_shape = canvas.create_oval(startx-r, starty-r, startx+r, starty+r,
                                     fill=tk_color_string, outline='#000000')
-    shapes.append(new_shape) # aggregate the canvas' item
-    
-    
-def under(event):
-    tk_color_string = color(red_intvar, green_intvar, blue_intvar)
-    new_shape = canvas.create_rectangle(startx, starty, startx,event.y,event.x, event.y,event.x, starty, fill=tk_color_string, outline='#000000')
-    shapes.append(new_shape)
+        shapes.append(new_shape) # aggregate the canvas' item
+    else:
+        new_shape = canvas.create_polygon(startx, starty, startx,event.y,event.x, event.y,event.x, starty, fill=tk_color_string, outline='#000000')
     
 # Subscribe handlers to the Button-1 and ButtonRelease-1 events
 canvas.bind('<Button-1>', down)
 canvas.bind('<ButtonRelease-1>', up)
-canvas.bind('<Button-2>', down)
-canvas.bind('<ButtonRelease-2>', under)
 
 ######
 # Functions to transform Intvars into Tkinter color strings
